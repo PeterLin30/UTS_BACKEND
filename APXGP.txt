@@ -1,0 +1,42 @@
+i. Nama Tim : APXGP
+
+ii. Anggota :
+- 241110658 / Peter Lin
+- 241110310 / Richard Lim
+- 241112044 / Stephanus Hartanto
+- 241111664 / Nicholas Lungnata
+- 241110679 / Michael Christoffer Chu
+
+iii. Teknologi yang Digunakan:
+
+1. Frontend (Antarmuka Pengguna)
+
+HTML5 & CSS3: Digunakan untuk membangun struktur dan desain tata letak (layout) secara native. Kami menerapkan teknik desain modern seperti Glassmorphism (efek kaca transparan) dan Responsive CSS Flexbox/Grid.
+
+Vanilla JavaScript (ES6+): Logika frontend dibangun murni menggunakan JavaScript tanpa framework (seperti React/Vue). Ini mencakup manipulasi DOM, penerapan Object-Oriented Programming (OOP) dengan class, serta penggunaan async/await dan fetch API untuk komunikasi data secara real-time.
+
+Chart.js (via CDN): Library JavaScript eksternal yang digunakan untuk merender visualisasi data (Grafik Penjualan) secara dinamis di dashboard Admin.
+
+SweetAlert2 (via CDN): Library eksternal untuk menggantikan alert bawaan browser dengan kotak dialog (pop-up) interaktif dan beranimasi yang disesuaikan dengan tema aplikasi.
+
+Google Fonts: Menggunakan font 'Outfit', 'DM Sans', dan 'Space Mono' (khusus untuk memberikan efek tulisan mesin kasir pada struk cetak).
+
+2. Backend (Server & API)
+
+
+Node.js: Sebagai runtime environment untuk menjalankan JavaScript di sisi server.
+
+Express.js: Framework Node.js yang digunakan untuk membangun Web Server dan sistem Routing RESTful API.
+
+MySQL2 (Promise): Modul driver database untuk menghubungkan aplikasi Node.js dengan database MySQL menggunakan sistem async/await.
+
+CORS: Middleware untuk mengizinkan pertukaran data (HTTP Request) antara frontend dan backend.
+
+3. Database
+
+MySQL: Sistem Manajemen Basis Data Relasional (RDBMS) yang digunakan untuk menyimpan data barang, riwayat transaksi, dan rekapitulasi shift kasir secara persisten.
+
+Link Template yang Digunakan:
+Tidak ada. Seluruh antarmuka web (UI/UX), mulai dari dashboard Admin bergaya Dark Teal Glassmorphism, hingga desain Struk Kertas Termal Hyper-Realistic (lengkap dengan efek sobekan zig-zag dan barcode murni CSS), dibangun 100% dari awal (from scratch) oleh tim kami.
+
+Kami tidak menggunakan template bootstrap, tailwind, atau template admin unduhan apa pun. Hal ini kami lakukan untuk memaksimalkan poin inovasi dan kreativitas pada tampilan dan fungsionalitas web sesuai dengan indikator penilaian.

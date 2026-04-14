@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APXGP Smart POS - UMKM</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        /* Kustomisasi SweetAlert2 agar menyatu dengan Tema Dark Teal APXGP */
+        .swal2-popup {
+            background: rgba(22, 36, 47, 0.95) !important;
+            backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(0, 201, 167, 0.2) !important;
+            border-radius: 16px !important;
+            color: #ffffff !important;
+            font-family: 'DM Sans', sans-serif !important;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 25px rgba(0, 201, 167, 0.15) !important;
+        }
+        .swal2-title { font-family: 'Outfit', sans-serif !important; color: #ffffff !important; }
+        .swal2-html-container { color: #a0aec0 !important; }
+        .swal2-input { 
+            background: rgba(0,0,0,0.3) !important; 
+            color: #ffffff !important; 
+            border: 1px solid rgba(255,255,255,0.1) !important; 
+        }
+        .swal2-input:focus { border-color: #00c9a7 !important; box-shadow: 0 0 0 3px rgba(0,201,167,0.25) !important; }
+        .swal2-confirm { background: #00c9a7 !important; color: #000 !important; font-weight: bold !important; border-radius: 8px !important; font-family: 'Outfit', sans-serif !important; }
+        .swal2-cancel { background: rgba(255,255,255,0.1) !important; color: #ffffff !important; border-radius: 8px !important; font-family: 'Outfit', sans-serif !important;}
+        .swal2-icon.swal2-warning { border-color: #f5a623 !important; color: #f5a623 !important; }
+        .swal2-icon.swal2-success { border-color: #00c9a7 !important; color: #00c9a7 !important; }
+        .swal2-icon.swal2-success [class^=swal2-success-line] { background-color: #00c9a7 !important; }
+        .swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(0, 201, 167, 0.3) !important; }
+        .swal2-icon.swal2-error { border-color: #ff5f5f !important; color: #ff5f5f !important; }
+        .swal2-icon.swal2-error [class^=swal2-x-mark-line] { background-color: #ff5f5f !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <main class="products-section">
+            <header>
+                <div>
+                    <h1>APXGP POS</h1>
+                    <p>Smart Retail & Economy System</p>
+                </div>
+                <div class="role-wrapper" style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                    <select id="role-selector" onchange="terapkanMode()" style="background: transparent; color: #00c9a7; border: none; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; outline: none;">
+                        <option value="kasir" style="background: #080f14; color: white;">Mode Kasir</option>
+                        <option value="admin" style="background: #080f14; color: white;">Mode Admin</option>
+                    </select>
+                </div>
+            </header>
+
+
+            <div id="area-laporan">
+                <div class="filter-row" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 24px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; font-weight: 800; color: #a0aec0; display: block; margin-bottom: 8px; letter-spacing: 0.05em;">FILTER TANGGAL</label>
+                        <input type="date" id="filter-tanggal" onchange="filterRiwayat()" style="width: 100%; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;">
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="font-size: 11px; font-weight: 800; color: #a0aec0; display: block; margin-bottom: 8px; letter-spacing: 0.05em;">CARI TRANSAKSI</label>
+                        <input type="text" id="filter-barang-riwayat" placeholder="Ketik nama barang..." onkeyup="filterRiwayat()" style="width: 100%; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;">
+                    </div>
+                    <div style="flex: 0.5; display: flex; align-items: flex-end;">
+                        <button onclick="resetFilterRiwayat()" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); color: #a0aec0;">Reset</button>
+                    </div>
+                </div>
+                
+                <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 15px;">Riwayat Penjualan</h3>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <button onclick="eksporKeCSV()" style="background: #00c9a7; color: #000; padding: 10px 18px;">📥 Ekspor CSV</button>
+                </div>
+                
+                <div style="width: 100%; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px;">
+                    <canvas id="grafikPenjualan"></canvas>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr style="background: rgba(0,0,0,0.4);">
+                            <th>ID Transaksi</th>
+                            <th>Waktu</th>
+                            <th>Detail Barang</th>
+                            <th style="text-align: right;">Pendapatan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-riwayat">
+                        <tr><td colspan="4" style="text-align: center; padding: 15px;">Memuat riwayat...</td></tr>
+                    </tbody>
+                </table>
+                
+                <h3 style="margin-top: 50px; font-size: 20px; font-weight: 700; border-top: 2px dashed rgba(255,255,255,0.1); padding-top: 30px;">Rekapitulasi Shift</h3>
+                
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr style="background: #1d3040;">
+                                <th>ID Shift</th>
+                                <th>Waktu Buka</th>
+                                <th>Waktu Tutup</th>
+                                <th>Modal Awal</th>
+                                <th>Sistem (Kembalian)</th>
+                                <th>Fisik Laci</th>
+                                <th>Selisih</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-shift">
+                            <tr><td colspan="8" style="text-align: center; padding: 15px;">Memuat riwayat shift...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div> 
+
+            <div id="area-tambah" style="border-left: 6px solid #f5a623;">
+                <h3 style="margin-top: 0; margin-bottom: 20px;">+ Manajemen Inventaris</h3>
+                <form id="form-tambah-barang" onsubmit="tambahBarangBaru(event)" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <input type="text" id="input-nama" placeholder="Nama Barang" required style="flex: 2; padding: 12px; background: rgba(0,0,0,0.25);">
+                    <input type="number" id="input-stok" placeholder="Jumlah Stok" required style="flex: 1; padding: 12px; background: rgba(0,0,0,0.25);">
+                    <input type="number" id="input-harga" placeholder="Harga (Rp)" required style="flex: 1; padding: 12px; background: rgba(0,0,0,0.25);">
+                    <button type="submit" style="padding: 12px 24px; background: #f5a623; color: #000; border: none; font-weight: 700;">Simpan Barang</button>
+                </form>
+            </div>
+            
+            <div style="margin-bottom: 24px; display: flex; gap: 10px; background: rgba(22, 36, 47, 0.75); padding: 10px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                <input type="text" id="search-bar" placeholder="🔍 Cari nama barang di APXGP..." onkeyup="filterBarang()" style="flex: 1; border: none; background: rgba(0,0,0,0.25);">
+                <button onclick="filterBarang()">Cari</button>
+            </div>
+
+            <div id="product-list" class="grid-container">
+                <p>Memuat data barang...</p>
+            </div>
+        </main>
+
+        <aside id="area-keranjang" class="cart-section">
+            
+            <div id="area-shift" style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 10px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.05);">
+                <h4 id="shift-status" style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700;">Status: Shift Belum Dibuka</h4>
+                <div id="shift-controls" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                </div>
+            </div>
+
+            <h2 style="margin-top: 0; font-size: 20px; font-weight: 800; padding-bottom: 12px; border-bottom: 2px solid rgba(255,255,255,0.1);">Billing Detail</h2>
+            
+            <div class="cart-items">
+                <p class="empty-cart" style="text-align: center; padding: 20px 0; color: #64748b; font-style: italic;">Keranjang masih kosong</p>
+            </div>
+            
+            <div class="cart-summary" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="margin-bottom: 16px;">
+                    <label style="font-size: 11px; font-weight: 800; color: #a0aec0; display: block; margin-bottom: 6px;">METODE PEMBAYARAN:</label>
+                    <select id="metode-pembayaran" onchange="hitungKembalian()" style="width: 100%; padding: 10px; background: rgba(22, 36, 47, 0.75); color: white; border: 1px solid rgba(255,255,255,0.1);">
+                        <option value="tunai">Tunai (Cash)</option>
+                        <option value="qris">QRIS (Fee 0.7%)</option>
+                        <option value="debit">Kartu Debit</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;">
+                    <span style="color: #a0aec0;">Subtotal:</span>
+                    <strong id="subtotal-price">Rp 0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: #ff5f5f;">
+                    <span>Biaya Layanan:</span>
+                    <strong id="biaya-layanan">Rp 0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #a78bfa;">
+                    <span>PPN (11%):</span>
+                    <strong id="ppn-layanan">Rp 0</strong>
+                </div>
+                
+                <div id="div-pembulatan" style="display: none; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #f5a623;">
+                    <span>Pembulatan:</span>
+                    <strong id="pembulatan-layanan">Rp 0</strong>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 16px; margin-top: 12px;">
+                    <span style="font-weight: 800; font-size: 16px;">TOTAL AKHIR:</span>
+                    <strong id="total-price" style="font-size: 22px; font-weight: 900; color: #00c9a7;">Rp 0</strong>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <label style="font-size: 11px; font-weight: 800; color: #a0aec0; display: block; margin-bottom: 6px;">NOMINAL DITERIMA:</label>
+                    <input type="number" id="uang-bayar" onkeyup="hitungKembalian()" placeholder="Rp 0" style="width: 100%; font-size: 18px; font-weight: 800; text-align: right; box-sizing: border-box; background: rgba(0,0,0,0.25);">
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 16px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); align-items: center;">
+                    <span style="font-weight: 700; font-size: 14px; color: #f5a623;">Kembali:</span>
+                    <strong id="uang-kembali" style="font-size: 18px; color: #00c9a7;">Rp 0</strong>
+                </div>
+                
+                <button class="btn-checkout" onclick="prosesCheckout()" style="width: 100%; margin-top: 20px; padding: 16px; font-size: 16px; font-weight: 800; background: linear-gradient(135deg, #00c9a7, #00dfba); color: #000; box-shadow: 0 8px 20px rgba(0,201,167,0.3); border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase;">🛒 SELESAIKAN PEMBAYARAN</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        let keranjang = [];
+        let currentShiftId = localStorage.getItem('shiftId');
+        let riwayatTransaksiFull = []; 
+        let salesChart = null; 
+
+        async function fetchProducts() {
+            try {
+                const response = await fetch('http://localhost:3000/api/products');
+                const result = await response.json();
+                
+                const productList = document.getElementById('product-list');
+                productList.innerHTML = ''; 
+                
+                if(result.status === 'success') {
+                    result.data.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'product-card';
+                        card.innerHTML = `
+                            <h3>${item.nama_barang}</h3>
+                            <p class="price">Rp ${parseFloat(item.harga).toLocaleString('id-ID')}</p>
+                            <p class="stock">Stok: ${item.stok}</p>
+                            <div>
+                                <button class="btn-tambah" onclick="tambahKeKeranjang(${item.id}, '${item.nama_barang}', ${item.harga}, ${item.stok})">Tambah</button>
+                                <button class="btn-tambah-stok" onclick="tambahStok(${item.id}, '${item.nama_barang}')">+ Stok</button>
+                                <button class="btn-hapus" onclick="hapusBarang(${item.id})">🗑️</button>
+                            </div>
+                        `;
+                        productList.appendChild(card);
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('product-list').innerHTML = '<p>Gagal memuat barang.</p>';
+            }
+        }
+
+        function tambahKeKeranjang(id, nama, harga, stokTersedia) {
+            const indexBarang = keranjang.findIndex(item => item.id === id);
+            if (indexBarang > -1) {
+                if(keranjang[indexBarang].qty >= stokTersedia) {
+                    Swal.fire({ icon: 'warning', title: 'Stok Kurang', text: `Maaf, stok ${nama} tidak mencukupi di gudang!` });
+                    return;
+                }
+                keranjang[indexBarang].qty += 1;
+            } else {
+                if(stokTersedia < 1) {
+                    Swal.fire({ icon: 'error', title: 'Stok Kosong', text: `Maaf, stok ${nama} sudah habis terjual!` });
+                    return;
+                }
+                keranjang.push({ id: id, nama: nama, harga: harga, qty: 1 });
+            }
+            renderKeranjang();
+        }
+
+        function hapusDariKeranjang(id) {
+            keranjang = keranjang.filter(item => item.id !== id);
+            renderKeranjang();
+        }
+
+        function renderKeranjang() {
+            const cartItemsContainer = document.querySelector('.cart-items');
+            cartItemsContainer.innerHTML = ''; 
+
+            if (keranjang.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="empty-cart" style="text-align: center; padding: 20px 0; color: #64748b; font-style: italic;">Keranjang masih kosong</p>';
+                hitungKembalian(); 
+                return;
+            }
+
+            keranjang.forEach(item => {
+                const subtotal = item.harga * item.qty;
+                const itemEl = document.createElement('div');
+                itemEl.style = "display:flex; justify-content:space-between; background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.05);";
+                
+                itemEl.innerHTML = `
+                    <div style="flex:2;">
+                        <h4 style="font-size: 14px; color: #ffffff; margin-bottom: 4px; font-weight: 700;">${item.nama}</h4>
+                        <p style="font-size: 12px; color: #a0aec0;">${item.qty} x Rp ${parseFloat(item.harga).toLocaleString('id-ID')}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <strong style="font-size: 14px; color: #00c9a7;">Rp ${subtotal.toLocaleString('id-ID')}</strong><br>
+                        <button onclick="hapusDariKeranjang(${item.id})" style="background: transparent; color: #ff5f5f; border: none; cursor: pointer; font-size: 11px; margin-top: 5px; font-weight: bold; padding: 0;">✕ Hapus</button>
+                    </div>
+                `;
+                cartItemsContainer.appendChild(itemEl);
+            });
+            hitungKembalian();
+        }
+
+        class MetodePembayaran {
+            constructor(subtotal) { this.subtotal = subtotal; }
+            hitungBiayaLayanan() { return 0; }
+        }
+        class QrisPembayaran extends MetodePembayaran {
+            hitungBiayaLayanan() { return this.subtotal * 0.007; }
+        }
+
+        function hitungKembalian() {
+            const subtotal = keranjang.reduce((total, item) => total + (item.harga * item.qty), 0);
+            const metode = document.getElementById('metode-pembayaran').value;
+            
+            let kalkulatorPembayaran = (metode === 'qris') ? new QrisPembayaran(subtotal) : new MetodePembayaran(subtotal);
+            let biayaLayanan = kalkulatorPembayaran.hitungBiayaLayanan();
+            const ppn = subtotal * 0.11; 
+            
+            let totalBayarAsli = subtotal + biayaLayanan + ppn;
+            let totalBayar = totalBayarAsli;
+            let pembulatan = 0;
+
+            if (metode === 'tunai') {
+                totalBayar = Math.ceil(totalBayarAsli / 100) * 100;
+                pembulatan = totalBayar - totalBayarAsli;
+            }
+            
+            const uangBayar = parseFloat(document.getElementById('uang-bayar').value) || 0;
+            const kembalian = uangBayar - totalBayar; 
+
+            document.getElementById('subtotal-price').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
+            document.getElementById('biaya-layanan').innerText = 'Rp ' + biayaLayanan.toLocaleString('id-ID');
+            document.getElementById('ppn-layanan').innerText = 'Rp ' + ppn.toLocaleString('id-ID');
+            
+            const divPembulatan = document.getElementById('div-pembulatan');
+            if (pembulatan > 0) {
+                divPembulatan.style.display = 'flex';
+                document.getElementById('pembulatan-layanan').innerText = 'Rp ' + pembulatan.toLocaleString('id-ID');
+            } else {
+                divPembulatan.style.display = 'none';
+            }
+
+            document.getElementById('total-price').innerText = 'Rp ' + totalBayar.toLocaleString('id-ID');
+
+            const kembalianEl = document.getElementById('uang-kembali');
+            if (keranjang.length === 0 || uangBayar === 0) {
+                kembalianEl.innerText = 'Rp 0';
+                kembalianEl.style.color = '#f5a623';
+            } else if (kembalian < 0) {
+                kembalianEl.innerText = 'Uang Kurang!';
+                kembalianEl.style.color = '#ff5f5f';
+            } else {
+                kembalianEl.innerText = 'Rp ' + kembalian.toLocaleString('id-ID');
+                kembalianEl.style.color = '#00c9a7';
+            }
+            return { subtotal, biayaLayanan, ppn, pembulatan, totalBayar, uangBayar, kembalian };
+        }
+
+        async function prosesCheckout() {
+            if (!currentShiftId) return Swal.fire({ icon: 'warning', title: 'Shift Belum Dibuka', text: 'Kasir belum membuka shift hari ini!' });
+            if (keranjang.length === 0) return Swal.fire({ icon: 'info', title: 'Keranjang Kosong', text: 'Tambahkan barang ke keranjang terlebih dahulu.' });
+
+            const hitungan = hitungKembalian();
+            const metode = document.getElementById('metode-pembayaran').value;
+
+            if (document.getElementById('uang-bayar').value === '' || hitungan.uangBayar < hitungan.totalBayar) {
+                document.getElementById('uang-bayar').focus(); 
+                return Swal.fire({ icon: 'error', title: 'Pembayaran Kurang', text: 'Uang yang diterima lebih kecil dari total tagihan!' });
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keranjang: keranjang, uangBayar: hitungan.uangBayar, metode: metode })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    
+                    // ==========================================
+                    // STRUK THERMAL REALISTIS CSS
+                    // ==========================================
+                    const metodeLabel = metode === 'qris' ? 'QRIS' : metode === 'debit' ? 'DEBIT' : 'TUNAI';
+                    const noTransaksi = `TRX-${Date.now().toString().slice(-7)}`;
+                    const tanggal = new Date().toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
+
+                    let itemRows = keranjang.map(i => `
+                        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:2px;">
+                            <span style="font-weight:700; color:#1e293b;">${i.nama}</span>
+                            <span style="font-weight:700;">${(i.qty * i.harga).toLocaleString('id-ID')}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; margin-bottom:8px;">
+                            <span>${i.qty} x ${parseFloat(i.harga).toLocaleString('id-ID')}</span>
+                        </div>
+                    `).join('');
+
+                    const strukhHTML = `
+                    <!DOCTYPE html>
+                    <html lang="id">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Struk Belanja APXGP</title>
+                        <style>
+                            @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+                            body { background: #94a3b8; display: flex; justify-content: center; padding: 30px; font-family: 'Space Mono', monospace; color: #0f172a; margin: 0; }
+                            .thermal { background: #f8fafc; width: 340px; padding: 30px 25px; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+                            .thermal::before { content: ""; position: absolute; top: -8px; left: 0; width: 100%; height: 8px; background: linear-gradient(45deg, #f8fafc 33.333%, transparent 33.333%, transparent 66.667%, #f8fafc 66.667%), linear-gradient(-45deg, #f8fafc 33.333%, transparent 33.333%, transparent 66.667%, #f8fafc 66.667%); background-size: 16px 16px; }
+                            .thermal::after { content: ""; position: absolute; bottom: -8px; left: 0; width: 100%; height: 8px; background: linear-gradient(135deg, #f8fafc 33.333%, transparent 33.333%, transparent 66.667%, #f8fafc 66.667%), linear-gradient(-135deg, #f8fafc 33.333%, transparent 33.333%, transparent 66.667%, #f8fafc 66.667%); background-size: 16px 16px; }
+                            .header { text-align: center; margin-bottom: 20px; }
+                            .logo { font-size: 26px; font-weight: 700; letter-spacing: -1px; margin-bottom: 5px; }
+                            .address { font-size: 11px; line-height: 1.5; color: #475569; }
+                            .divider { border-top: 1.5px dashed #94a3b8; margin: 15px 0; }
+                            .meta { font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 4px; }
+                            .row { display: flex; justify-content: space-between; font-size: 12px; }
+                            .summary { margin-top: 20px; }
+                            .total-row { font-size: 18px; font-weight: 700; padding: 10px 0; border-top: 2px dashed #0f172a; border-bottom: 2px dashed #0f172a; margin: 10px 0; }
+                            .barcode-container { text-align: center; margin-top: 25px; }
+                            .barcode { height: 45px; width: 90%; margin: 0 auto; background: repeating-linear-gradient(90deg, #0f172a 0, #0f172a 2px, transparent 2px, transparent 4px, #0f172a 4px, #0f172a 5px, transparent 5px, transparent 8px, #0f172a 8px, #0f172a 12px, transparent 12px, transparent 14px); }
+                            .barcode-text { font-size: 11px; letter-spacing: 4px; margin-top: 5px; font-weight: bold;}
+                            .footer { text-align: center; font-size: 11px; margin-top: 25px; color: #475569; line-height: 1.6; }
+                            @media print { body { background: white; padding: 0; } .thermal { box-shadow: none; width: 100%; max-width: 320px; margin: 0 auto; } .thermal::before, .thermal::after { display: none; } }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="thermal">
+                            <div class="header">
+                                <div class="logo">APXGP STORE</div>
+                                <div class="address">Smart Retail System<br>Jl. Teknologi Informatika No.1<br>Medan, Sumatera Utara</div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="meta"><span>Tanggal:</span><span>${tanggal}</span></div>
+                            <div class="meta"><span>Receipt:</span><span>${noTransaksi}</span></div>
+                            <div class="meta"><span>Kasir:</span><span>${namaKasirAktif} (#${currentShiftId})</span></div>
+                            <div class="divider"></div>
+                            
+                            ${itemRows}
+                            
+                            <div class="divider"></div>
+                            <div class="summary">
+                                <div class="row" style="margin-bottom:4px;"><span>Subtotal</span><span>${hitungan.subtotal.toLocaleString('id-ID')}</span></div>
+                                <div class="row" style="margin-bottom:4px;"><span>PPN (11%)</span><span>${hitungan.ppn.toLocaleString('id-ID')}</span></div>
+                                ${hitungan.biayaLayanan > 0 ? `<div class="row" style="margin-bottom:4px;"><span>Fee (${metodeLabel})</span><span>${hitungan.biayaLayanan.toLocaleString('id-ID')}</span></div>` : ''}
+                                ${hitungan.pembulatan > 0 ? `<div class="row" style="margin-bottom:4px;"><span>Pembulatan</span><span>${hitungan.pembulatan.toLocaleString('id-ID')}</span></div>` : ''}
+                                
+                                <div class="row total-row"><span>TOTAL</span><span>Rp ${hitungan.totalBayar.toLocaleString('id-ID')}</span></div>
+                                
+                                <div class="row" style="margin-bottom:4px;"><span>DIBAYAR (${metodeLabel})</span><span>${hitungan.uangBayar.toLocaleString('id-ID')}</span></div>
+                                <div class="row" style="font-weight:bold;"><span>KEMBALI</span><span>${hitungan.kembalian.toLocaleString('id-ID')}</span></div>
+                            </div>
+                            <div class="barcode-container"><div class="barcode"></div><div class="barcode-text">${noTransaksi}</div></div>
+                            <div class="footer"><b>TERIMA KASIH</b><br>Barang yang sudah dibeli<br>tidak dapat ditukar/dikembalikan.</div>
+                        </div>
+                        <script>window.onload = () => { window.print(); setTimeout(() => window.close(), 1000); }<\/script>
+                    </body>
+                    </html>
+                    `;
+
+                    const printWindow = window.open('', '', 'width=420,height=700');
+                    printWindow.document.write(strukhHTML);
+                    printWindow.document.close();
+
+                    keranjang = []; 
+                    document.getElementById('uang-bayar').value = ''; 
+                    renderKeranjang(); 
+                    fetchProducts(); 
+                    fetchHistory();
+                    
+                    Swal.fire({ icon: 'success', title: 'Transaksi Sukses!', text: 'Struk sedang dicetak...', timer: 1500, showConfirmButton: false });
+                } else { 
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: result.message });
+                }
+            } catch (error) { 
+                Swal.fire({ icon: 'error', title: 'Error Server', text: 'Terjadi kesalahan saat memproses data ke server.' });
+            }
+        }
+
+        async function tambahBarangBaru(event) {
+            event.preventDefault(); 
+            const nama = document.getElementById('input-nama').value;
+            const stok = parseInt(document.getElementById('input-stok').value);
+            const harga = parseFloat(document.getElementById('input-harga').value);
+
+            try {
+                const response = await fetch('http://localhost:3000/api/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nama_barang: nama, stok: stok, harga: harga })
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'Tersimpan!', text: result.message, timer: 1500, showConfirmButton: false });
+                    document.getElementById('form-tambah-barang').reset(); 
+                    fetchProducts(); 
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal menambahkan barang: ' + result.message });
+                }
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan pada server.' });
+            }
+        }
+
+        async function fetchHistory() {
+            try {
+                const response = await fetch('http://localhost:3000/api/transactions');
+                const result = await response.json();
+                if(result.status === 'success') {
+                    riwayatTransaksiFull = result.data; 
+                    renderRiwayat(riwayatTransaksiFull); 
+                }
+            } catch (error) { console.error('Error history:', error); }
+        }
+
+        function renderRiwayat(dataAkanDitampilkan) {
+            const tableBody = document.getElementById('table-riwayat');
+            tableBody.innerHTML = '';
+            
+            if(dataAkanDitampilkan.length > 0) {
+                dataAkanDitampilkan.forEach(trx => {
+                    const tr = document.createElement('tr');
+                    const dateObj = new Date(trx.tanggal);
+                    const formattedDate = dateObj.toLocaleString('id-ID');
+                    tr.innerHTML = `
+                        <td class="td-muted">#TRX-00${trx.id}</td>
+                        <td>${formattedDate}</td>
+                        <td class="td-detail">${trx.detail_barang || '-'}</td>
+                        <td class="td-income" style="text-align:right;">Rp ${parseFloat(trx.total_harga).toLocaleString('id-ID')}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 25px; color: #64748b; font-style: italic;">Tidak ada transaksi yang cocok.</td></tr>';
+            }
+            buatGrafik(dataAkanDitampilkan);
+        }
+
+        function filterRiwayat() {
+            const inputTgl = document.getElementById('filter-tanggal').value; 
+            const inputBrg = document.getElementById('filter-barang-riwayat').value.toLowerCase();
+            const dataTersaring = riwayatTransaksiFull.filter(trx => {
+                const teksBarang = (trx.detail_barang || '').toLowerCase();
+                const cocokBarang = inputBrg === '' || teksBarang.includes(inputBrg);
+                let cocokTanggal = true;
+                if (inputTgl) {
+                    const d = new Date(trx.tanggal);
+                    const thn = d.getFullYear();
+                    const bln = String(d.getMonth() + 1).padStart(2, '0');
+                    const tgl = String(d.getDate()).padStart(2, '0');
+                    const tglLokal = `${thn}-${bln}-${tgl}`;
+                    cocokTanggal = (tglLokal === inputTgl);
+                }
+                return cocokBarang && cocokTanggal;
+            });
+            renderRiwayat(dataTersaring);
+        }
+
+        function resetFilterRiwayat() {
+            document.getElementById('filter-tanggal').value = '';
+            document.getElementById('filter-barang-riwayat').value = '';
+            renderRiwayat(riwayatTransaksiFull); 
+        }
+
+        function filterBarang() {
+            const keyword = document.getElementById('search-bar').value.toLowerCase();
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach(card => {
+                const h3Element = card.querySelector('h3');
+                if (h3Element) {
+                    card.style.display = h3Element.innerText.toLowerCase().includes(keyword) ? '' : 'none'; 
+                }
+            });
+        }
+
+        async function hapusBarang(id) {
+            const result = await Swal.fire({
+                title: 'Hapus Barang?',
+                text: "Data ini tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff5f5f',
+                cancelButtonColor: 'rgba(255,255,255,0.1)',
+                confirmButtonText: 'Ya, Hapus!'
+            });
+            if (!result.isConfirmed) return;
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/products/${id}`, { method: 'DELETE' });
+                const res = await response.json();
+                if(res.status === 'success') { fetchProducts(); }
+            } catch (error) { Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal menghapus barang.' }); }
+        }
+
+        function buatGrafik(dataRiwayat) {
+            const ctx = document.getElementById('grafikPenjualan').getContext('2d');
+            if (salesChart !== null) { salesChart.destroy(); }
+            const dataDibalik = [...dataRiwayat].reverse();
+            const labelTransaksi = dataDibalik.map(trx => '#TRX-00' + trx.id);
+            const nilaiPendapatan = dataDibalik.map(trx => parseFloat(trx.total_harga));
+
+            salesChart = new Chart(ctx, {
+                type: 'bar', 
+                data: {
+                    labels: labelTransaksi,
+                    datasets: [{
+                        label: 'Pendapatan Transaksi (Rp)',
+                        data: nilaiPendapatan,
+                        backgroundColor: 'rgba(0, 201, 167, 0.8)',
+                        borderRadius: 6,
+                        borderWidth: 0
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    plugins: { legend: { labels: { color: '#e8f1f7', font: {family: 'Outfit'} } } },
+                    scales: {
+                        x: { ticks: { color: '#a0aec0' }, grid: { display: false } },
+                        y: { ticks: { color: '#a0aec0' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function eksporKeCSV() {
+            let csvContent = "ID Transaksi,Waktu,Detail Barang,Pendapatan (Rp)\n";
+            const barisTabel = document.querySelectorAll('#table-riwayat tr');
+            if (barisTabel.length === 1 && barisTabel[0].innerText.includes('Memuat')) {
+                return Swal.fire({ icon: 'info', title: 'Data Kosong', text: 'Belum ada data riwayat untuk diekspor.' });
+            }
+            barisTabel.forEach(row => {
+                const kolom = row.querySelectorAll('td');
+                if (kolom.length > 0) {
+                    const id = kolom[0].innerText;
+                    const waktu = kolom[1].innerText;
+                    const detailBarang = kolom[2].innerText.replace(/"/g, '""'); 
+                    const pendapatan = kolom[3].innerText.replace(/Rp|\.|,/g, '').trim(); 
+                    csvContent += `${id},"${waktu}","${detailBarang}",${pendapatan}\n`;
+                }
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", "Laporan_Penjualan_APXGP.csv");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        function terapkanMode() {
+            const mode = document.getElementById('role-selector').value;
+            document.body.setAttribute('data-mode', mode);
+            const areaLaporan = document.getElementById('area-laporan');
+            const areaTambah = document.getElementById('area-tambah');
+            const areaKeranjang = document.getElementById('area-keranjang');
+
+            if (mode === 'kasir') {
+                areaLaporan.style.display = 'none';
+                areaTambah.style.display = 'none';
+                areaKeranjang.style.display = 'block';
+            } else if (mode === 'admin') {
+                areaLaporan.style.display = 'block';
+                areaTambah.style.display = 'block';
+                areaKeranjang.style.display = 'none';
+            }
+        }
+
+        async function tambahStok(id, nama) {
+            const { value: inputStok } = await Swal.fire({
+                title: `Tambah Stok`,
+                text: `Untuk barang: ${nama}`,
+                input: 'number',
+                inputPlaceholder: 'Contoh: 10',
+                showCancelButton: true,
+                confirmButtonColor: '#00c9a7',
+                cancelButtonColor: 'rgba(255,255,255,0.1)',
+                confirmButtonText: 'Tambahkan',
+                inputValidator: (value) => {
+                    if (!value || value <= 0) return 'Harap masukkan angka yang valid!';
+                }
+            });
+            if (!inputStok) return; 
+
+            const tambahan = parseInt(inputStok);
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/products/${id}/stock`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tambahan_stok: tambahan })
+                });
+                const result = await response.json();
+                if (result.status === 'success') { fetchProducts(); Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Stok berhasil ditambahkan!', timer: 1500, showConfirmButton: false }); } 
+                else { Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal menambah stok: ' + result.message }); }
+            } catch (error) { Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan pada server saat menambah stok.' }); }
+        }
+
+        let namaKasirAktif = localStorage.getItem('namaKasir') || 'Admin';
+
+        async function mulaiShift() {
+            const nama = document.getElementById('nama-kasir-input').value;
+            const modal = document.getElementById('modal-awal').value;
+            if(!nama || !modal) return Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Masukkan Nama Kasir dan Modal Awal terlebih dahulu!' });
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/shift/buka', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ modal_awal: modal, nama_kasir: nama })
+                });
+                const res = await response.json();
+                if(res.status === 'success') {
+                    currentShiftId = res.shiftId;
+                    namaKasirAktif = nama;
+                    localStorage.setItem('shiftId', currentShiftId);
+                    localStorage.setItem('namaKasir', namaKasirAktif);
+                    updateShiftUI();
+                    Swal.fire({ icon: 'success', title: 'Shift Dibuka!', text: `Selamat bertugas, Kasir ${nama}!`, timer: 1500, showConfirmButton: false });
+                }
+            } catch (error) { Swal.fire({ icon: 'error', title: 'Offline', text: 'Gagal terhubung ke server.' }); }
+        }
+
+        async function selesaiShift() {
+            const totalFisik = document.getElementById('total-fisik').value;
+            if(!totalFisik) return Swal.fire({ icon: 'warning', title: 'Laci Kosong', text: 'Masukkan total uang tunai fisik yang ada di laci kasir saat ini!' });
+            
+            const result = await Swal.fire({
+                title: 'Tutup Shift?',
+                text: "Sistem akan merekap perhitungan selisih kas.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ff5f5f',
+                cancelButtonColor: 'rgba(255,255,255,0.1)',
+                confirmButtonText: 'Ya, Tutup Shift'
+            });
+            if (!result.isConfirmed) return;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/shift/tutup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id: currentShiftId, total_fisik: totalFisik })
+                });
+                const res = await response.json();
+                if(res.status === 'success') {
+                    currentShiftId = null;
+                    localStorage.removeItem('shiftId');
+                    updateShiftUI();
+                    fetchShiftHistory();
+                    Swal.fire({ icon: 'success', title: 'Shift Ditutup', text: 'Data selisih kas telah direkap dengan aman.', timer: 2000, showConfirmButton: false });
+                }
+            } catch (error) { Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal terhubung ke server saat menutup shift.' }); }
+        }
+
+        function updateShiftUI() {
+            const statusText = document.getElementById('shift-status');
+            const controls = document.getElementById('shift-controls');
+            
+            if(currentShiftId) {
+                statusText.innerText = `🟢 SHIFT AKTIF (#${currentShiftId}) - KASIR: ${namaKasirAktif.toUpperCase()}`;
+                statusText.style.color = "#00c9a7";
+                controls.innerHTML = `
+                    <input type="number" id="total-fisik" placeholder="Uang Laci Fisik (Rp)" style="flex: 2; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.25); color: white;">
+                    <button onclick="selesaiShift()" style="background: rgba(255,95,95,0.15); color: #ff5f5f; border: 1px solid #ff5f5f; padding: 10px 15px; border-radius: 6px; cursor: pointer;">Tutup Shift</button>
+                `;
+            } else {
+                statusText.innerText = "🔴 SHIFT BELUM DIBUKA";
+                statusText.style.color = "#ff5f5f";
+                controls.innerHTML = `
+                    <input type="text" id="nama-kasir-input" placeholder="Nama Kasir" style="flex: 2; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.25); color: white;">
+                    <input type="number" id="modal-awal" placeholder="Modal Awal (Rp)" style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.25); color: white;">
+                    <button onclick="mulaiShift()" style="background: #00c9a7; color: #000; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Buka Shift</button>
+                `;
+            }
+        }
+
+        async function fetchShiftHistory() {
+            try {
+                const response = await fetch('http://localhost:3000/api/shifts');
+                const result = await response.json();
+                const tableBody = document.getElementById('table-shift');
+                tableBody.innerHTML = '';
+
+                if (result.status === 'success' && result.data.length > 0) {
+                    result.data.forEach(shift => {
+                        const tr = document.createElement('tr');
+
+                        const buka = new Date(shift.waktu_buka).toLocaleString('id-ID');
+                        const tutup = shift.waktu_tutup ? new Date(shift.waktu_tutup).toLocaleString('id-ID') : '- Belum Tutup -';
+                        
+                        let selisihColor = '#00c9a7'; 
+                        let selisihText = shift.selisih;
+                        if(shift.selisih < 0) { selisihColor = '#ff5f5f'; } 
+                        else if(shift.selisih > 0) { selisihColor = '#f5a623'; selisihText = '+' + shift.selisih; }
+
+                        const statusBadge = shift.status === 'buka' 
+                            ? '<span style="background:#00c9a7; color:#000; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800;">BUKA</span>'
+                            : '<span style="background:rgba(255,255,255,0.1); color:#a0aec0; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; border: 1px solid rgba(255,255,255,0.1);">TUTUP</span>';
+
+                        tr.innerHTML = `
+                            <td style="color:#a0aec0;">#SHF-${shift.id}<br><small style="color:#ffffff; font-weight:600;">${shift.nama_kasir || '-'}</small></td>
+                            <td>${buka}</td>
+                            <td>${tutup}</td>
+                            <td style="color:#a0aec0;">Rp ${parseFloat(shift.modal_awal).toLocaleString('id-ID')}</td>
+                            <td style="color:#60a5fa; font-weight:700;">Rp ${parseFloat(shift.total_tunai_sistem).toLocaleString('id-ID')}</td>
+                            <td>Rp ${parseFloat(shift.total_tunai_fisik).toLocaleString('id-ID')}</td>
+                            <td style="color:${selisihColor}; font-weight:800;">Rp ${parseFloat(selisihText).toLocaleString('id-ID')}</td>
+                            <td>${statusBadge}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 25px; color: #64748b; font-style: italic;">Belum ada riwayat shift.</td></tr>';
+                }
+            } catch (error) { console.error('Error fetching shift history:', error); }
+        }
+
+        window.onload = () => {
+            fetchProducts();
+            fetchHistory();
+            terapkanMode(); 
+            updateShiftUI();
+            fetchShiftHistory(); 
+        };
+    </script>
+</body>
+</html>

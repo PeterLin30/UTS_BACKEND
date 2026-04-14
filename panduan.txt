@@ -1,0 +1,59 @@
+# 🛒 Panduan Instalasi & Menjalankan Smart POS APXGP
+
+Aplikasi ini adalah Sistem Kasir (Point of Sales) dan Manajemen Inventaris yang dibangun menggunakan arsitektur **Node.js (Express)** untuk Backend dan **Vanilla HTML/CSS/JS** untuk Frontend. Aplikasi ini menggunakan **MySQL** sebagai basis data.
+
+## 🛠️ Persiapan Sistem (Prerequisites)
+Pastikan komputer Anda sudah terinstal aplikasi berikut sebelum menjalankan program:
+1. **Node.js** (Versi 16 atau lebih baru)
+2. **XAMPP** (Untuk menjalankan MySQL Server)
+3. **Web Browser** modern (Chrome / Edge / Firefox)
+
+---
+
+## 🗄️ Langkah 1: Persiapan Database (MySQL)
+1. Buka aplikasi **XAMPP Control Panel**.
+2. Klik tombol **Start** pada modul **MySQL**. (Pastikan MySQL berjalan di port `3307` sesuai konfigurasi aplikasi).
+3. Buka **phpMyAdmin** (di browser: `http://localhost/phpmyadmin`) atau **MySQL Workbench**.
+4. Buat database baru dengan nama: **`apxgp`**
+5. Buka Tab Query SQL lalu copy dari file apxgp.sql dari folder awal lalu paste di query dan langsung run
+6. Jika ingin mengeditnya sendiri bisa buka di folder config lalu ada file database.js, disana user bisa mengubah port, password dan nama database sesuai yang dibuat.
+---
+
+## ⚙️ Langkah 2: Persiapan Backend (Node.js)
+1. Buka **Terminal** atau **Command Prompt (CMD)**.
+2. Arahkan direktori terminal ke dalam folder proyek ini. (Contoh: `cd C:\Users\ASUS\Documents\UTS Backend`).
+3. Instal semua pustaka (*library*) yang dibutuhkan dengan mengetikkan perintah berikut lalu tekan Enter:
+
+   npm install
+
+   *(Perintah ini akan mengunduh otomatis library seperti `express`, `mysql2`, `cors`, dll ke dalam folder `node_modules`).*
+
+---
+
+## 🚀 Langkah 3: Menjalankan Server Backend
+1. Di terminal yang sama (di dalam folder proyek), jalankan perintah:
+
+   npm run dev
+
+2. Pastikan muncul tulisan hijau dari **nodemon** dan pesan bahwa server berhasil terkoneksi:
+   `Server berjalan di port 3000`
+   `Koneksi ke database berhasil`
+3. **Biarkan terminal ini tetap terbuka** selama Anda menggunakan aplikasi.
+
+---
+
+## 🖥️ Langkah 4: Menjalankan Frontend (Aplikasi Kasir)
+Karena bagian *frontend* menggunakan HTML statis, Anda memiliki dua cara untuk membukanya:
+**Cara 1 (Paling Mudah):** Buka folder proyek Anda di File Explorer, lalu klik dua kali pada file **`index.html`**. File akan otomatis terbuka di browser Anda.
+* **Cara 2 (Saran Developer):** Buka folder proyek di Visual Studio Code, lalu gunakan ekstensi **Live Server** dengan mengklik tombol "Go Live" di pojok kanan bawah.
+
+---
+
+## 💡 Panduan Penggunaan (Singkat) untuk Dosen Penguji
+1. **Buka Shift Kasir:** Ubah ke `Mode Kasir` di pojok kanan atas, masukkan nama kasir dan modal awal, lalu klik "Buka Shift".
+2. **Transaksi:** Cari barang, klik "Tambah", tentukan metode pembayaran (Tunai/QRIS/Debit), masukkan nominal uang bayar, lalu klik "Proses Transaksi & Cetak". (Struk termal akan otomatis muncul untuk dicetak).
+3. **Tutup Shift:** Masukkan sisa uang fisik yang ada di laci, lalu klik "Tutup Shift" untuk merekap selisih kas.
+4. **Lihat Laporan:** Ubah ke `Mode Admin` untuk melihat Grafik Penjualan (Chart.js), riwayat transaksi, rekapan shift, dan melakukan ekspor data ke Excel (CSV).
+
+***
+
