@@ -10,6 +10,16 @@ Pastikan komputer Anda sudah terinstal aplikasi berikut sebelum menjalankan prog
 
 ---
 
+. Unduh Repositori
+Buka terminal/Command Prompt dan jalankan perintah berikut untuk mengunduh source code:
+
+- git clone https://github.com/PeterLin30/UTS_BACKEND.git
+
+- cd UTS_BACKEND
+
+
+---
+
 ## 🗄️ Langkah 1: Persiapan Database (MySQL)
 1. Buka aplikasi **XAMPP Control Panel**.
 2. Klik tombol **Start** pada modul **MySQL**. (Pastikan MySQL berjalan di port `3307` sesuai konfigurasi aplikasi).
