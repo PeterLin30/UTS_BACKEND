@@ -9,32 +9,36 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        /* Kustomisasi SweetAlert2 agar menyatu dengan Tema Dark Teal APXGP */
+        /* Kustomisasi SweetAlert2 */
         .swal2-popup {
-            background: rgba(22, 36, 47, 0.95) !important;
-            backdrop-filter: blur(16px) !important;
-            border: 1px solid rgba(0, 201, 167, 0.2) !important;
-            border-radius: 16px !important;
-            color: #ffffff !important;
-            font-family: 'DM Sans', sans-serif !important;
+            background: rgba(22, 36, 47, 0.95) !important; backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(0, 201, 167, 0.2) !important; border-radius: 16px !important;
+            color: #ffffff !important; font-family: 'DM Sans', sans-serif !important;
             box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 25px rgba(0, 201, 167, 0.15) !important;
         }
         .swal2-title { font-family: 'Outfit', sans-serif !important; color: #ffffff !important; }
         .swal2-html-container { color: #a0aec0 !important; }
-        .swal2-input { 
-            background: rgba(0,0,0,0.3) !important; 
-            color: #ffffff !important; 
-            border: 1px solid rgba(255,255,255,0.1) !important; 
-        }
+        .swal2-input { background: rgba(0,0,0,0.3) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
         .swal2-input:focus { border-color: #00c9a7 !important; box-shadow: 0 0 0 3px rgba(0,201,167,0.25) !important; }
         .swal2-confirm { background: #00c9a7 !important; color: #000 !important; font-weight: bold !important; border-radius: 8px !important; font-family: 'Outfit', sans-serif !important; }
         .swal2-cancel { background: rgba(255,255,255,0.1) !important; color: #ffffff !important; border-radius: 8px !important; font-family: 'Outfit', sans-serif !important;}
-        .swal2-icon.swal2-warning { border-color: #f5a623 !important; color: #f5a623 !important; }
-        .swal2-icon.swal2-success { border-color: #00c9a7 !important; color: #00c9a7 !important; }
-        .swal2-icon.swal2-success [class^=swal2-success-line] { background-color: #00c9a7 !important; }
-        .swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(0, 201, 167, 0.3) !important; }
-        .swal2-icon.swal2-error { border-color: #ff5f5f !important; color: #ff5f5f !important; }
-        .swal2-icon.swal2-error [class^=swal2-x-mark-line] { background-color: #ff5f5f !important; }
+        
+        /* Tombol Quick Cash */
+        .quick-cash-btn { 
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+            color: #ffffff; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; transition: 0.2s; 
+        }
+        .quick-cash-btn:hover { background: #00c9a7; color: #000; border-color: #00c9a7; }
+
+        /* Kustomisasi Cetak PDF Laporan Utama */
+        @media print {
+            body * { visibility: hidden; }
+            #area-laporan, #area-laporan * { visibility: visible; }
+            #area-laporan { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; background: white; color: black !important; }
+            .filter-row, button, header, aside, #area-tambah, #search-bar, .role-wrapper { display: none !important; }
+            h3, th, td { color: black !important; border-color: #ccc !important; }
+            td.td-muted, td.td-detail { color: #333 !important; }
+        }
     </style>
 </head>
 <body>
@@ -45,14 +49,14 @@
                     <h1>APXGP POS</h1>
                     <p>Smart Retail & Economy System</p>
                 </div>
-                <div class="role-wrapper" style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="role-wrapper" style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px;">
                     <select id="role-selector" onchange="terapkanMode()" style="background: transparent; color: #00c9a7; border: none; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; outline: none;">
                         <option value="kasir" style="background: #080f14; color: white;">Mode Kasir</option>
                         <option value="admin" style="background: #080f14; color: white;">Mode Admin</option>
                     </select>
+                    <button onclick="toggleFullScreen()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 10px; font-size: 12px; border-radius: 6px;">🖥️ Kiosk</button>
                 </div>
             </header>
-
 
             <div id="area-laporan">
                 <div class="filter-row" style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 24px;">
@@ -71,8 +75,9 @@
                 
                 <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 15px;">Riwayat Penjualan</h3>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px;">
                     <button onclick="eksporKeCSV()" style="background: #00c9a7; color: #000; padding: 10px 18px;">📥 Ekspor CSV</button>
+                    <button onclick="window.print()" style="background: #3b82f6; color: #fff; padding: 10px 18px; border: none; font-weight: bold;">🖨️ Cetak PDF</button>
                 </div>
                 
                 <div style="width: 100%; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px;">
@@ -127,8 +132,14 @@
             </div>
             
             <div style="margin-bottom: 24px; display: flex; gap: 10px; background: rgba(22, 36, 47, 0.75); padding: 10px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-                <input type="text" id="search-bar" placeholder="🔍 Cari nama barang di APXGP..." onkeyup="filterBarang()" style="flex: 1; border: none; background: rgba(0,0,0,0.25);">
-                <button onclick="filterBarang()">Cari</button>
+                <input type="text" id="search-bar" placeholder="🔍 Cari nama barang di APXGP..." onkeyup="renderProducts()" style="flex: 1; border: none; background: rgba(0,0,0,0.25);">
+                <select id="sort-barang" onchange="renderProducts()" style="background: rgba(0,0,0,0.3); color: white; border: none; padding: 0 15px; border-radius: 6px;">
+                    <option value="az">A - Z</option>
+                    <option value="za">Z - A</option>
+                    <option value="termurah">Termurah</option>
+                    <option value="termahal">Termahal</option>
+                    <option value="stok">Stok Terbanyak</option>
+                </select>
             </div>
 
             <div id="product-list" class="grid-container">
@@ -186,6 +197,11 @@
                 <div style="margin-top: 20px;">
                     <label style="font-size: 11px; font-weight: 800; color: #a0aec0; display: block; margin-bottom: 6px;">NOMINAL DITERIMA:</label>
                     <input type="number" id="uang-bayar" onkeyup="hitungKembalian()" placeholder="Rp 0" style="width: 100%; font-size: 18px; font-weight: 800; text-align: right; box-sizing: border-box; background: rgba(0,0,0,0.25);">
+                    <div style="display: flex; gap: 6px; margin-top: 8px; justify-content: flex-end;">
+                        <button class="quick-cash-btn" onclick="setUangCepat(totalBayarGlobal)">Uang Pas</button>
+                        <button class="quick-cash-btn" onclick="setUangCepat(50000)">50rb</button>
+                        <button class="quick-cash-btn" onclick="setUangCepat(100000)">100rb</button>
+                    </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; margin-top: 16px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); align-items: center;">
@@ -199,40 +215,89 @@
     </div>
 
     <script>
+        let allProducts = []; // Menyimpan semua data produk untuk fitur Live Sort & Search
         let keranjang = [];
         let currentShiftId = localStorage.getItem('shiftId');
         let riwayatTransaksiFull = []; 
         let salesChart = null; 
+        let totalBayarGlobal = 0; // Menyimpan total untuk fitur Quick Cash
+
+        // Fitur 1: Full Screen Mode (Kiosk)
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) { document.exitFullscreen(); }
+            }
+        }
+
+        // Fitur 3: Tombol Set Uang Cepat
+        function setUangCepat(nominal) {
+            document.getElementById('uang-bayar').value = nominal;
+            hitungKembalian();
+        }
 
         async function fetchProducts() {
             try {
                 const response = await fetch('http://localhost:3000/api/products');
                 const result = await response.json();
                 
-                const productList = document.getElementById('product-list');
-                productList.innerHTML = ''; 
-                
                 if(result.status === 'success') {
-                    result.data.forEach(item => {
-                        const card = document.createElement('div');
-                        card.className = 'product-card';
-                        card.innerHTML = `
-                            <h3>${item.nama_barang}</h3>
-                            <p class="price">Rp ${parseFloat(item.harga).toLocaleString('id-ID')}</p>
-                            <p class="stock">Stok: ${item.stok}</p>
-                            <div>
-                                <button class="btn-tambah" onclick="tambahKeKeranjang(${item.id}, '${item.nama_barang}', ${item.harga}, ${item.stok})">Tambah</button>
-                                <button class="btn-tambah-stok" onclick="tambahStok(${item.id}, '${item.nama_barang}')">+ Stok</button>
-                                <button class="btn-hapus" onclick="hapusBarang(${item.id})">🗑️</button>
-                            </div>
-                        `;
-                        productList.appendChild(card);
-                    });
+                    allProducts = result.data;
+                    renderProducts(); // Memanggil fungsi render yang baru
                 }
             } catch (error) {
                 console.error(error);
-                document.getElementById('product-list').innerHTML = '<p>Gagal memuat barang.</p>';
+                document.getElementById('product-list').innerHTML = '<p>Gagal memuat barang dari server.</p>';
             }
+        }
+
+        // FITUR 2: Rendering Pintar (Sort & Live Search)
+        function renderProducts() {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = ''; 
+
+            const keyword = document.getElementById('search-bar').value.toLowerCase();
+            const sortMethod = document.getElementById('sort-barang').value;
+
+            // Filter
+            let filteredProducts = allProducts.filter(item => item.nama_barang.toLowerCase().includes(keyword));
+
+            // Sort
+            if (sortMethod === 'az') {
+                filteredProducts.sort((a, b) => a.nama_barang.localeCompare(b.nama_barang));
+            } else if (sortMethod === 'za') {
+                filteredProducts.sort((a, b) => b.nama_barang.localeCompare(a.nama_barang));
+            } else if (sortMethod === 'termurah') {
+                filteredProducts.sort((a, b) => a.harga - b.harga);
+            } else if (sortMethod === 'termahal') {
+                filteredProducts.sort((a, b) => b.harga - a.harga);
+            } else if (sortMethod === 'stok') {
+                filteredProducts.sort((a, b) => b.stok - a.stok);
+            }
+
+            if(filteredProducts.length === 0) {
+                productList.innerHTML = '<p style="color:#a0aec0; width:100%;">Barang tidak ditemukan.</p>';
+                return;
+            }
+
+            filteredProducts.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <h3>${item.nama_barang}</h3>
+                    <p class="price">Rp ${parseFloat(item.harga).toLocaleString('id-ID')}</p>
+                    <p class="stock">Stok: ${item.stok}</p>
+                    <div>
+                        <button class="btn-tambah" onclick="tambahKeKeranjang(${item.id}, '${item.nama_barang}', ${item.harga}, ${item.stok})">Tambah</button>
+                        <button class="btn-tambah-stok" onclick="tambahStok(${item.id}, '${item.nama_barang}')">+ Stok</button>
+                        <button class="btn-hapus" onclick="hapusBarang(${item.id})">🗑️</button>
+                    </div>
+                `;
+                productList.appendChild(card);
+            });
         }
 
         function tambahKeKeranjang(id, nama, harga, stokTersedia) {
@@ -313,6 +378,8 @@
                 pembulatan = totalBayar - totalBayarAsli;
             }
             
+            totalBayarGlobal = totalBayar; // Simpan untuk tombol Quick Cash
+
             const uangBayar = parseFloat(document.getElementById('uang-bayar').value) || 0;
             const kembalian = uangBayar - totalBayar; 
 
@@ -365,10 +432,6 @@
 
                 const result = await response.json();
                 if (result.status === 'success') {
-                    
-                    // ==========================================
-                    // STRUK THERMAL REALISTIS CSS
-                    // ==========================================
                     const metodeLabel = metode === 'qris' ? 'QRIS' : metode === 'debit' ? 'DEBIT' : 'TUNAI';
                     const noTransaksi = `TRX-${Date.now().toString().slice(-7)}`;
                     const tanggal = new Date().toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
@@ -517,7 +580,7 @@
                     tableBody.appendChild(tr);
                 });
             } else {
-                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 25px; color: #64748b; font-style: italic;">Tidak ada transaksi yang cocok.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 25px; color: #64748b; font-style: italic;">Tidak ada riwayat.</td></tr>';
             }
             buatGrafik(dataAkanDitampilkan);
         }
@@ -546,17 +609,6 @@
             document.getElementById('filter-tanggal').value = '';
             document.getElementById('filter-barang-riwayat').value = '';
             renderRiwayat(riwayatTransaksiFull); 
-        }
-
-        function filterBarang() {
-            const keyword = document.getElementById('search-bar').value.toLowerCase();
-            const cards = document.querySelectorAll('.product-card');
-            cards.forEach(card => {
-                const h3Element = card.querySelector('h3');
-                if (h3Element) {
-                    card.style.display = h3Element.innerText.toLowerCase().includes(keyword) ? '' : 'none'; 
-                }
-            });
         }
 
         async function hapusBarang(id) {
@@ -593,8 +645,7 @@
                         label: 'Pendapatan Transaksi (Rp)',
                         data: nilaiPendapatan,
                         backgroundColor: 'rgba(0, 201, 167, 0.8)',
-                        borderRadius: 6,
-                        borderWidth: 0
+                        borderRadius: 6, borderWidth: 0
                     }]
                 },
                 options: { 
@@ -651,26 +702,18 @@
 
         async function tambahStok(id, nama) {
             const { value: inputStok } = await Swal.fire({
-                title: `Tambah Stok`,
-                text: `Untuk barang: ${nama}`,
-                input: 'number',
-                inputPlaceholder: 'Contoh: 10',
-                showCancelButton: true,
-                confirmButtonColor: '#00c9a7',
-                cancelButtonColor: 'rgba(255,255,255,0.1)',
+                title: `Tambah Stok`, text: `Untuk barang: ${nama}`,
+                input: 'number', inputPlaceholder: 'Contoh: 10',
+                showCancelButton: true, confirmButtonColor: '#00c9a7', cancelButtonColor: 'rgba(255,255,255,0.1)',
                 confirmButtonText: 'Tambahkan',
-                inputValidator: (value) => {
-                    if (!value || value <= 0) return 'Harap masukkan angka yang valid!';
-                }
+                inputValidator: (value) => { if (!value || value <= 0) return 'Harap masukkan angka yang valid!'; }
             });
             if (!inputStok) return; 
 
             const tambahan = parseInt(inputStok);
-            
             try {
                 const response = await fetch(`http://localhost:3000/api/products/${id}/stock`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tambahan_stok: tambahan })
                 });
                 const result = await response.json();
@@ -688,8 +731,7 @@
             
             try {
                 const response = await fetch('http://localhost:3000/api/shift/buka', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ modal_awal: modal, nama_kasir: nama })
                 });
                 const res = await response.json();
@@ -709,20 +751,14 @@
             if(!totalFisik) return Swal.fire({ icon: 'warning', title: 'Laci Kosong', text: 'Masukkan total uang tunai fisik yang ada di laci kasir saat ini!' });
             
             const result = await Swal.fire({
-                title: 'Tutup Shift?',
-                text: "Sistem akan merekap perhitungan selisih kas.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#ff5f5f',
-                cancelButtonColor: 'rgba(255,255,255,0.1)',
-                confirmButtonText: 'Ya, Tutup Shift'
+                title: 'Tutup Shift?', text: "Sistem akan merekap perhitungan selisih kas.", icon: 'question',
+                showCancelButton: true, confirmButtonColor: '#ff5f5f', cancelButtonColor: 'rgba(255,255,255,0.1)', confirmButtonText: 'Ya, Tutup Shift'
             });
             if (!result.isConfirmed) return;
 
             try {
                 const response = await fetch('http://localhost:3000/api/shift/tutup', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ id: currentShiftId, total_fisik: totalFisik })
                 });
                 const res = await response.json();
@@ -768,23 +804,17 @@
                 if (result.status === 'success' && result.data.length > 0) {
                     result.data.forEach(shift => {
                         const tr = document.createElement('tr');
-
                         const buka = new Date(shift.waktu_buka).toLocaleString('id-ID');
                         const tutup = shift.waktu_tutup ? new Date(shift.waktu_tutup).toLocaleString('id-ID') : '- Belum Tutup -';
                         
-                        let selisihColor = '#00c9a7'; 
-                        let selisihText = shift.selisih;
-                        if(shift.selisih < 0) { selisihColor = '#ff5f5f'; } 
-                        else if(shift.selisih > 0) { selisihColor = '#f5a623'; selisihText = '+' + shift.selisih; }
+                        let selisihColor = '#00c9a7'; let selisihText = shift.selisih;
+                        if(shift.selisih < 0) { selisihColor = '#ff5f5f'; } else if(shift.selisih > 0) { selisihColor = '#f5a623'; selisihText = '+' + shift.selisih; }
 
-                        const statusBadge = shift.status === 'buka' 
-                            ? '<span style="background:#00c9a7; color:#000; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800;">BUKA</span>'
-                            : '<span style="background:rgba(255,255,255,0.1); color:#a0aec0; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; border: 1px solid rgba(255,255,255,0.1);">TUTUP</span>';
+                        const statusBadge = shift.status === 'buka' ? '<span style="background:#00c9a7; color:#000; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800;">BUKA</span>' : '<span style="background:rgba(255,255,255,0.1); color:#a0aec0; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; border: 1px solid rgba(255,255,255,0.1);">TUTUP</span>';
 
                         tr.innerHTML = `
                             <td style="color:#a0aec0;">#SHF-${shift.id}<br><small style="color:#ffffff; font-weight:600;">${shift.nama_kasir || '-'}</small></td>
-                            <td>${buka}</td>
-                            <td>${tutup}</td>
+                            <td>${buka}</td><td>${tutup}</td>
                             <td style="color:#a0aec0;">Rp ${parseFloat(shift.modal_awal).toLocaleString('id-ID')}</td>
                             <td style="color:#60a5fa; font-weight:700;">Rp ${parseFloat(shift.total_tunai_sistem).toLocaleString('id-ID')}</td>
                             <td>Rp ${parseFloat(shift.total_tunai_fisik).toLocaleString('id-ID')}</td>
@@ -793,19 +823,11 @@
                         `;
                         tableBody.appendChild(tr);
                     });
-                } else {
-                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 25px; color: #64748b; font-style: italic;">Belum ada riwayat shift.</td></tr>';
-                }
+                } else { tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 25px; color: #64748b; font-style: italic;">Belum ada riwayat shift.</td></tr>'; }
             } catch (error) { console.error('Error fetching shift history:', error); }
         }
 
-        window.onload = () => {
-            fetchProducts();
-            fetchHistory();
-            terapkanMode(); 
-            updateShiftUI();
-            fetchShiftHistory(); 
-        };
+        window.onload = () => { fetchProducts(); fetchHistory(); terapkanMode(); updateShiftUI(); fetchShiftHistory(); };
     </script>
 </body>
 </html>
