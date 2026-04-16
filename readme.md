@@ -48,18 +48,66 @@ Pastikan Anda sudah menginstal:
 * [Node.js](https://nodejs.org/) (v16+)
 * [XAMPP](https://www.apachefriends.org/) (Untuk MySQL)
 
-### 2. Persiapan Database
-1.  Buka **XAMPP Control Panel** dan aktifkan modul **MySQL**.
-2.  Masuk ke `phpMyAdmin` atau `MySQL Workbench`.
-3.  Buat database baru bernama `apxgp`.
-4.  Impor file `apxgp.sql` yang ada di root folder ke dalam database tersebut.
-    > **Catatan**: Jika port MySQL Anda bukan `3306`, sesuaikan pengaturannya di file `config/database.js`.
+### 2. Mengunduh Source Code
+Anda bisa mendapatkan kode sumber aplikasi ini melalui dua cara:
 
-### 3. Menjalankan Server
-Buka terminal/CMD di folder proyek, lalu jalankan:
+**Opsi A: Menggunakan Git Clone (Terminal/CMD)**
 ```bash
-# Install dependensi
+git clone [https://github.com/PeterLin30/UTS_BACKEND.git](https://github.com/PeterLin30/UTS_BACKEND.git)
+cd UTS_BACKEND
+
+**Opsi B: Mengunduh File ZIP**
+1. Buka tautan repositori GitHub proyek ini: [https://github.com/PeterLin30/UTS_BACKEND](https://github.com/PeterLin30/UTS_BACKEND)
+2. Klik tombol hijau **`<> Code`** di kanan atas, lalu pilih **`Download ZIP`**.
+3. Ekstrak file ZIP tersebut di komputer Anda.
+4. Buka folder hasil ekstraksi, lalu buka Terminal/CMD di dalam folder tersebut.
+
+### 3. Persiapan Database
+1. Buka **XAMPP Control Panel** dan aktifkan modul **MySQL**.
+2. Buat database baru bernama `apxgp` melalui `phpMyAdmin` atau `MySQL Workbench`.
+3. **Cara Impor File `apxgp.sql`:**
+
+   **Opsi A: Menggunakan phpMyAdmin (Rekomendasi)**
+   * Pilih database **`apxgp`** di kolom sebelah kiri.
+   * Klik tab **Import** pada menu bagian atas.
+   * Klik tombol **Choose File** dan pilih file `apxgp.sql` yang berada di folder root proyek Anda.
+   * Gulir ke bawah dan klik tombol **Import** (atau **Go**).
+
+   **Opsi B: Menggunakan MySQL Workbench**
+   * Masuk ke koneksi database Anda.
+   * Klik dua kali pada database **`apxgp`** agar menjadi aktif (*bold*).
+   * Klik menu **File** > **Open SQL Script...** dan pilih file `apxgp.sql`.
+   * Klik ikon **Petir (⚡)** di atas tab editor untuk mengeksekusi perintah SQL.
+
+   > **Catatan**: Secara default aplikasi terhubung ke database bernama `apxgp` tanpa password. Jika port MySQL Anda bukan `3306`, atau Anda memiliki password, silakan sesuaikan pengaturannya di file `config/database.js`.
+
+### 4. Menjalankan Server
+Pastikan terminal/CMD Anda sudah berada di dalam folder proyek, lalu jalankan perintah berikut secara berurutan:
+
+```bash
+# Install seluruh library yang dibutuhkan
 npm install
 
-# Jalankan server dengan Nodemon
+# Jalankan server aplikasi
 npm run dev
+
+### 5. Akses Aplikasi
+* **Backend**: Server API berjalan di `http://localhost:3000`
+* **Frontend**: Buka File Explorer Anda, cari file `index.html`, lalu klik dua kali untuk membukanya di browser. (Atau gunakan ekstensi **Live Server** jika Anda menggunakan VS Code).
+
+---
+
+## 💡 Panduan Penggunaan Singkat
+
+1. **Buka Shift Kasir:** Ubah ke `Mode Kasir` di opsi kanan atas. Masukkan nama kasir dan modal awal, lalu klik **"Buka Shift"**.
+2. **Transaksi:** Cari barang, klik "Tambah", tentukan metode pembayaran (Tunai/QRIS/Debit), masukkan nominal uang bayar, lalu klik **"Proses Transaksi & Cetak"**. 
+3. **Tutup Shift:** Di akhir sesi, masukkan sisa uang fisik yang ada di laci kasir, lalu klik **"Tutup Shift"** untuk merekap perhitungan selisih kas.
+4. **Laporan Admin:** Ubah ke `Mode Admin` untuk melihat Grafik Penjualan, riwayat transaksi, rekapan *shift* harian, serta fitur ekspor laporan ke format Excel (CSV).
+
+---
+
+## 👨‍💻 Tim Pengembang
+* **APXGP**
+
+---
+*Proyek ini dibuat untuk memenuhi Tugas UTS Mata Kuliah Pengembangan Web Back-End.*
