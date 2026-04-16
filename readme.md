@@ -52,7 +52,7 @@ Pastikan Anda sudah menginstal:
 Anda bisa mendapatkan kode sumber aplikasi ini melalui dua cara:
 
 **Opsi A: Menggunakan Git Clone (Terminal/CMD)**
-```bash
+
 git clone [https://github.com/PeterLin30/UTS_BACKEND.git](https://github.com/PeterLin30/UTS_BACKEND.git)
 cd UTS_BACKEND
 
@@ -84,7 +84,6 @@ cd UTS_BACKEND
 ### 4. Menjalankan Server
 Pastikan terminal/CMD Anda sudah berada di dalam folder proyek, lalu jalankan perintah berikut secara berurutan:
 
-```bash
 # Install seluruh library yang dibutuhkan
 npm install
 
