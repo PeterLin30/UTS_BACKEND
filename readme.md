@@ -1,82 +1,65 @@
-🛒 Panduan Instalasi & Menjalankan Smart POS APXGP
-Aplikasi ini adalah Sistem Kasir (Point of Sales) dan Manajemen Inventaris yang dibangun menggunakan arsitektur Node.js (Express) untuk Backend dan Vanilla HTML/CSS/JS untuk Frontend. Aplikasi ini menggunakan MySQL sebagai basis data.
+# 🛒 Smart POS APXGP - Sistem Kasir UMKM Premium
 
-🛠️ Persiapan Sistem (Prerequisites)
-Pastikan komputer Anda sudah terinstal aplikasi berikut sebelum menjalankan program:
+![Node.js](https://img.shields.io/badge/Backend-Node.js-green)
+![JavaScript](https://img.shields.io/badge/Frontend-Vanilla%20JS-yellow)
+![MySQL](https://img.shields.io/badge/Database-MySQL-blue)
 
-Node.js (Versi 16 atau lebih baru)
+**Smart POS APXGP** adalah aplikasi manajemen penjualan dan inventaris yang dirancang khusus untuk membantu operasional UMKM secara digital. Aplikasi ini hadir dengan antarmuka **Glassmorphism** modern dan fitur **Hyper-Realistic Thermal Receipt**.
 
-XAMPP (Untuk menjalankan MySQL Server)
+---
 
-Web Browser modern (Chrome / Edge / Firefox)
+## 🚀 Fitur Unggulan
 
-📥 Mengunduh Source Code
-Anda bisa mendapatkan kode aplikasi ini melalui 2 cara. Pilih salah satu yang paling mudah bagi Anda:
+Aplikasi ini mencakup fitur lengkap dari manajemen gudang hingga laporan keuangan:
 
-Opsi A: Menggunakan Git (Bagi pengguna Git)
-Buka Terminal atau Command Prompt, lalu jalankan perintah berikut:
+### 💼 Manajemen Kasir & Transaksi
+* **Multi-Payment Method**: Mendukung Tunai (dengan pembulatan otomatis), QRIS (dengan kalkulasi fee), dan Kartu Debit.
+* **Thermal Receipt Simulator**: Struk belanja digital dengan desain realistis (efek kertas thermal, zig-zag cut, dan barcode).
+* **Stock Validation**: Mencegah transaksi jika stok barang tidak mencukupi.
 
-Bash
-git clone https://github.com/PeterLin30/UTS_BACKEND.git
-cd UTS_BACKEND
-Opsi B: Unduh File ZIP (Cara Manual)
+### 📈 Analitik & Laporan (Mode Admin)
+* **Sales Dashboard**: Visualisasi pendapatan real-time menggunakan grafik interaktif (Chart.js).
+* **Shift Management**: Pencatatan modal awal, penutupan kas, dan deteksi selisih uang laci secara otomatis.
+* **Export Data**: Kemampuan mengunduh laporan penjualan dalam format `.csv` (Excel).
 
-Buka link repositori GitHub: https://github.com/PeterLin30/UTS_BACKEND
+### 📦 Inventaris (CRUD)
+* Pengelolaan katalog barang (Tambah, Edit Stok, Hapus).
+* Fitur pencarian barang secara instan (*Live Search*).
 
-Klik tombol hijau <> Code, lalu pilih Download ZIP.
+---
 
-Ekstrak file ZIP tersebut di komputer Anda.
+## 🛠️ Teknologi yang Digunakan
 
-Buka folder hasil ekstrak (UTS_BACKEND-main).
+| Sektor | Teknologi |
+| :--- | :--- |
+| **Backend** | Node.js, Express.js, MySQL2 |
+| **Frontend** | Vanilla JavaScript (ES6+), HTML5, CSS3 |
+| **UI/UX** | Glassmorphism Style, SweetAlert2, Google Fonts |
+| **Library** | Chart.js (Analitik) |
 
-🗄️ Langkah 1: Persiapan Database (MySQL)
-Buka aplikasi XAMPP Control Panel.
+---
 
-Klik tombol Start pada modul MySQL.
+## 📥 Instalasi & Persiapan
 
-Buka phpMyAdmin (di browser: http://localhost/phpmyadmin) atau MySQL Workbench.
+Ikuti langkah-langkah berikut untuk menjalankan proyek di komputer Anda:
 
-Buat database baru dengan nama: apxgp
+### 1. Prasyarat
+Pastikan Anda sudah menginstal:
+* [Node.js](https://nodejs.org/) (v16+)
+* [XAMPP](https://www.apachefriends.org/) (Untuk MySQL)
 
-Import Data: Buka file apxgp.sql yang ada di dalam folder proyek, lalu copy seluruh isinya dan paste ke tab SQL / Query di phpMyAdmin/Workbench Anda. Klik Run/Kirim untuk mengeksekusi.
+### 2. Persiapan Database
+1.  Buka **XAMPP Control Panel** dan aktifkan modul **MySQL**.
+2.  Masuk ke `phpMyAdmin` atau `MySQL Workbench`.
+3.  Buat database baru bernama `apxgp`.
+4.  Impor file `apxgp.sql` yang ada di root folder ke dalam database tersebut.
+    > **Catatan**: Jika port MySQL Anda bukan `3306`, sesuaikan pengaturannya di file `config/database.js`.
 
-💡 Kustomisasi Database (Opsional):
-Secara default, aplikasi terhubung ke port 3307 tanpa password. Jika Anda ingin mengubah Port, Password, atau Nama Database agar sesuai dengan komputer Anda, silakan buka folder config dan edit file database.js.
-
-⚙️ Langkah 2: Persiapan Backend (Node.js)
-Buka Terminal atau Command Prompt (CMD).
-
-Arahkan terminal ke dalam folder proyek yang sudah Anda unduh (Contoh: cd C:\Users\NamaAnda\Downloads\UTS_BACKEND).
-
-Instal semua pustaka (library) yang dibutuhkan dengan mengetikkan perintah berikut lalu tekan Enter:
-
-Bash
+### 3. Menjalankan Server
+Buka terminal/CMD di folder proyek, lalu jalankan:
+```bash
+# Install dependensi
 npm install
-(Perintah ini akan mengunduh otomatis library seperti express, mysql2, cors, dll ke dalam folder node_modules).
 
-🚀 Langkah 3: Menjalankan Server Backend
-Di terminal yang sama (di dalam folder proyek), jalankan perintah berikut untuk menghidupkan server:
-
-Bash
+# Jalankan server dengan Nodemon
 npm run dev
-Pastikan muncul tulisan dari nodemon dan pesan sukses seperti ini:
-✅ Server berjalan di port 3000
-✅ Koneksi ke database berhasil
-
-Biarkan terminal ini tetap terbuka selama Anda menggunakan aplikasi.
-
-🖥️ Langkah 4: Menjalankan Frontend (Aplikasi Kasir)
-Karena bagian frontend menggunakan HTML statis, Anda memiliki dua cara untuk membukanya:
-
-Cara 1 (Paling Mudah): Buka folder proyek Anda di File Explorer, cari file index.html, lalu klik dua kali. Aplikasi akan langsung terbuka di browser Anda.
-
-Cara 2 (Saran Developer): Buka folder proyek menggunakan Visual Studio Code, klik kanan pada file index.html, lalu pilih "Open with Live Server".
-
-💡 Panduan Penggunaan (Singkat)
-Buka Shift Kasir: Ubah ke Mode Kasir di opsi kanan atas. Masukkan nama kasir dan modal awal, lalu klik "Buka Shift".
-
-Transaksi: Cari barang, klik "Tambah", tentukan metode pembayaran (Tunai/QRIS/Debit), masukkan nominal uang yang dibayar pelanggan, lalu klik "Proses Transaksi & Cetak". (Struk termal akan otomatis muncul untuk dicetak).
-
-Tutup Shift: Setelah selesai berjualan, masukkan sisa uang fisik yang ada di laci kasir, lalu klik "Tutup Shift" untuk merekap perhitungan selisih kas.
-
-Lihat Laporan Admin: Ubah dropdown ke Mode Admin untuk melihat Grafik Penjualan (Chart.js), tabel riwayat transaksi, rekapan shift harian, serta fitur untuk mengekspor laporan ke Excel (CSV).
