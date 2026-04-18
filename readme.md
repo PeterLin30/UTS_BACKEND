@@ -8,9 +8,9 @@
 
 ---
 
-## 🚀 Fitur Unggulan (21 Fitur Komprehensif)
+## 🚀 Fitur Unggulan (23 Fitur Komprehensif)
 
-Aplikasi ini mencakup **21 fitur fungsional** yang terbagi ke dalam 4 modul utama untuk memastikan manajemen gudang, transaksi, dan laporan keuangan berjalan secara profesional:
+Aplikasi ini mencakup **23 fitur fungsional** yang terbagi ke dalam 4 modul utama untuk memastikan manajemen gudang, transaksi, dan laporan keuangan berjalan secara profesional:
 
 ### 🛒 Modul Transaksi Kasir (Point of Sale)
 1. **Manajemen Keranjang Cerdas:** Fitur tambah/hapus barang dengan validasi stok *real-time* (mencegah penambahan jika stok gudang habis).
