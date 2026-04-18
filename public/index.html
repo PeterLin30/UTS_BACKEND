@@ -548,10 +548,11 @@
                             <div class="barcode-container"><div class="barcode"></div><div class="barcode-text">${noTransaksi}</div></div>
                             <div class="footer"><b>TERIMA KASIH</b><br>Barang yang sudah dibeli<br>tidak dapat ditukar/dikembalikan.</div>
                         </div>
-                        <script>window.onload = () => { window.print(); setTimeout(() => window.close(), 1000); }<\/script>
-                    </body>
-                    </html>
+                        ` + "<scr" + "ipt>window.onload = () => { window.print(); setTimeout(() => window.close(), 1000); }</scr" + "ipt>" + `
+                    </bo` + `dy>
+                    </ht` + `ml>
                     `;
+                    
 
                     const printWindow = window.open('', '', 'width=420,height=700');
                     printWindow.document.write(strukhHTML);
