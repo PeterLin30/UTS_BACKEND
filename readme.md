@@ -19,27 +19,29 @@ Aplikasi ini mencakup **21 fitur fungsional** yang terbagi ke dalam 4 modul utam
 4. **Kalkulator Kembalian & Validasi:** Menghitung uang kembalian secara presisi dan otomatis memblokir transaksi jika nominal uang yang diinput kurang dari total tagihan.
 5. **Cetak Struk *Hyper-Realistic*:** Menghasilkan bon kasir digital yang didesain persis seperti kertas termal fisik, lengkap dengan efek sobekan zig-zag dan *Barcode* berbasis CSS murni.
 6. **Quick Cash (Tombol Uang Cepat):** Tombol *shortcut* pintar (Uang Pas, 50rb, 100rb) untuk mempercepat input nominal pembayaran oleh kasir tanpa perlu mengetik manual.
+7. **Peringatan Saldo Laci (Real-time Drawer Balance):** Sistem pelacakan uang fisik dinamis yang otomatis memblokir transaksi jika kembalian melebihi kas yang ada di laci.
+8. **Otomatisasi Uang Pas (Cashless):** Menyembunyikan form input nominal dan kembalian secara otomatis saat metode QRIS/Debit dipilih.
 
 ### ⏱️ Modul Manajemen Shift (Keuangan)
-7. **Buka Shift (Open Shift):** Memulai sesi kasir dengan mencatat Nama Kasir yang bertugas dan jumlah Modal Awal di laci kasir.
-8. **Tutup Shift (End of Day):** Fitur akuntansi yang menghitung ekspektasi uang laci berdasarkan Modal Awal ditambah pendapatan tunai dan dikurangi kembalian.
-9. **Deteksi Selisih Kas:** Sistem membandingkan uang fisik yang diinput kasir dengan data sistem, lalu menampilkan status selisih (Minus/Balance/Plus) dengan indikator warna.
-10. **Log Riwayat Shift:** Tabel rekapitulasi komprehensif dari seluruh sesi *shift* yang pernah berjalan beserta status keuangannya.
+1. **Buka Shift (Open Shift):** Memulai sesi kasir dengan mencatat Nama Kasir yang bertugas dan jumlah Modal Awal di laci kasir.
+2. **Tutup Shift (End of Day):** Fitur akuntansi yang menghitung ekspektasi uang laci berdasarkan Modal Awal ditambah pendapatan tunai dan dikurangi kembalian.
+3. **Deteksi Selisih Kas:** Sistem membandingkan uang fisik yang diinput kasir dengan data sistem, lalu menampilkan status selisih (Minus/Balance/Plus) dengan indikator warna.
+4. **Log Riwayat Shift:** Tabel rekapitulasi komprehensif dari seluruh sesi *shift* yang pernah berjalan beserta status keuangannya.
 
 ### 📊 Modul Admin & Analitik (Dashboard)
-11. **Manajemen Inventaris (CRUD):** Fitur lengkap untuk menambah produk baru, menyuntikkan tambahan stok barang, dan menghapus barang dari database.
-12. **Live Search Engine:** Fitur pencarian barang secara instan tanpa perlu memuat ulang (*refresh*) halaman web.
-13. **Smart Sorting Produk:** *Dropdown* filter cerdas untuk mengurutkan daftar barang berdasarkan A-Z, Z-A, Harga Termurah, Harga Termahal, atau Stok Terbanyak.
-14. **Grafik Penjualan Interaktif:** Visualisasi tren pendapatan menggunakan *library* **Chart.js** yang ter-*update* secara dinamis.
-15. **Filter Laporan Lanjutan:** Fitur untuk menyaring riwayat transaksi secara spesifik berdasarkan Tanggal tertentu maupun kata kunci detail barang.
-16. **Ekspor Laporan (CSV):** Fitur *one-click* untuk mengunduh seluruh data riwayat transaksi menjadi *spreadsheet* Excel (.csv).
-17. **Cetak Laporan Otomatis (PDF):** Mode cetak khusus (*Print CSS*) yang menghilangkan elemen UI tidak penting dan memformat tabel serta grafik analisis menjadi dokumen PDF yang rapi.
+1. **Manajemen Inventaris (CRUD):** Fitur lengkap untuk menambah produk baru, menyuntikkan tambahan stok barang, mengurangi stok barang dan menghapus barang dari database.
+2. **Live Search Engine:** Fitur pencarian barang secara instan tanpa perlu memuat ulang (*refresh*) halaman web.
+3. **Smart Sorting Produk:** *Dropdown* filter cerdas untuk mengurutkan daftar barang berdasarkan A-Z, Z-A, Harga Termurah, Harga Termahal, atau Stok Terbanyak.
+4. **Grafik Penjualan Interaktif:** Visualisasi tren pendapatan menggunakan *library* **Chart.js** yang ter-*update* secara dinamis.
+5. **Filter Laporan Lanjutan:** Fitur untuk menyaring riwayat transaksi secara spesifik berdasarkan Tanggal tertentu maupun kata kunci detail barang.
+6. **Ekspor Laporan (CSV):** Fitur *one-click* untuk mengunduh seluruh data riwayat transaksi menjadi *spreadsheet* Excel (.csv).
+7. **Cetak Laporan Otomatis (PDF):** Mode cetak khusus (*Print CSS*) yang menghilangkan elemen UI tidak penting dan memformat tabel serta grafik analisis menjadi dokumen PDF yang rapi.
 
 ### ⚙️ Modul Sistem & Keamanan (Arsitektur)
-18. **Role-Based Access Control (RBAC):** Pemisahan antarmuka secara instan. Mode Kasir menyembunyikan laporan keuangan, sedangkan Mode Admin menyembunyikan panel mesin kasir.
-19. **Mode Kiosk (Full-Screen):** Fitur penampil layar penuh yang mensimulasikan antarmuka mesin POS sungguhan di minimarket, memblokir gangguan elemen *browser* lain.
-20. **Asynchronous API Integration:** Seluruh interaksi tombol ke *database* menggunakan konsep `async/await` dan `fetch API`, membuat web sangat responsif layaknya *Single Page Application* (SPA).
-21. **Notifikasi Premium (SweetAlert2):** Kotak dialog (*pop-up*) peringatan bergaya *Glassmorphism* yang elegan dan beranimasi, menggantikan *alert* kaku bawaan *browser*.
+1. **Role-Based Access Control (RBAC):** Pemisahan antarmuka secara instan. Mode Kasir menyembunyikan laporan keuangan, sedangkan Mode Admin menyembunyikan panel mesin kasir.
+2. **Mode Kiosk (Full-Screen):** Fitur penampil layar penuh yang mensimulasikan antarmuka mesin POS sungguhan di minimarket, memblokir gangguan elemen *browser* lain.
+3. **Asynchronous API Integration:** Seluruh interaksi tombol ke *database* menggunakan konsep `async/await` dan `fetch API`, membuat web sangat responsif layaknya *Single Page Application* (SPA).
+4. **Notifikasi Premium (SweetAlert2):** Kotak dialog (*pop-up*) peringatan bergaya *Glassmorphism* yang elegan dan beranimasi, menggantikan *alert* kaku bawaan *browser*.
 
 ---
 

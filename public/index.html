@@ -39,6 +39,17 @@
             h3, th, td { color: black !important; border-color: #ccc !important; }
             td.td-muted, td.td-detail { color: #333 !important; }
         }
+
+        /* --- KONTROL AKSES TOMBOL (RBAC) --- */
+        /* Menyembunyikan tombol Admin saat mode Kasir aktif */
+        body[data-mode="kasir"] .btn-admin-only { 
+            display: none !important; 
+        }
+        /* Menyembunyikan tombol Kasir (Tambah Keranjang) saat mode Admin aktif */
+        body[data-mode="admin"] .btn-kasir-only { 
+            display: none !important; 
+        }
+        
     </style>
 </head>
 <body>
@@ -215,14 +226,17 @@
     </div>
 
     <script>
-        let allProducts = []; // Menyimpan semua data produk untuk fitur Live Sort & Search
+        let allProducts = []; 
         let keranjang = [];
         let currentShiftId = localStorage.getItem('shiftId');
         let riwayatTransaksiFull = []; 
         let salesChart = null; 
-        let totalBayarGlobal = 0; // Menyimpan total untuk fitur Quick Cash
+        let totalBayarGlobal = 0; 
+        
+        let namaKasirAktif = localStorage.getItem('namaKasir') || 'Admin';
+        let modalAwalShift = parseFloat(localStorage.getItem('modalAwal')) || 0;
+        let pendapatanTunaiShiftIni = parseFloat(localStorage.getItem('pendapatanTunai')) || 0;
 
-        // Fitur 1: Full Screen Mode (Kiosk)
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
@@ -233,7 +247,6 @@
             }
         }
 
-        // Fitur 3: Tombol Set Uang Cepat
         function setUangCepat(nominal) {
             document.getElementById('uang-bayar').value = nominal;
             hitungKembalian();
@@ -246,7 +259,7 @@
                 
                 if(result.status === 'success') {
                     allProducts = result.data;
-                    renderProducts(); // Memanggil fungsi render yang baru
+                    renderProducts(); 
                 }
             } catch (error) {
                 console.error(error);
@@ -254,7 +267,6 @@
             }
         }
 
-        // FITUR 2: Rendering Pintar (Sort & Live Search)
         function renderProducts() {
             const productList = document.getElementById('product-list');
             productList.innerHTML = ''; 
@@ -262,10 +274,8 @@
             const keyword = document.getElementById('search-bar').value.toLowerCase();
             const sortMethod = document.getElementById('sort-barang').value;
 
-            // Filter
             let filteredProducts = allProducts.filter(item => item.nama_barang.toLowerCase().includes(keyword));
 
-            // Sort
             if (sortMethod === 'az') {
                 filteredProducts.sort((a, b) => a.nama_barang.localeCompare(b.nama_barang));
             } else if (sortMethod === 'za') {
@@ -291,9 +301,13 @@
                     <p class="price">Rp ${parseFloat(item.harga).toLocaleString('id-ID')}</p>
                     <p class="stock">Stok: ${item.stok}</p>
                     <div>
-                        <button class="btn-tambah" onclick="tambahKeKeranjang(${item.id}, '${item.nama_barang}', ${item.harga}, ${item.stok})">Tambah</button>
-                        <button class="btn-tambah-stok" onclick="tambahStok(${item.id}, '${item.nama_barang}')">+ Stok</button>
-                        <button class="btn-hapus" onclick="hapusBarang(${item.id})">🗑️</button>
+                        <div>
+                        <button class="btn-tambah btn-kasir-only" onclick="tambahKeKeranjang(${item.id}, '${item.nama_barang}', ${item.harga}, ${item.stok})">Tambah</button>
+                        
+                        <button class="btn-tambah-stok btn-admin-only" onclick="tambahStok(${item.id}, '${item.nama_barang}')">+ Stok</button>
+                        <button class="btn-tambah-stok btn-admin-only" style="background: rgba(255,95,95,0.15) !important; color: #ff5f5f !important; border-color: #ff5f5f !important;" onclick="kurangiStok(${item.id}, '${item.nama_barang}', ${item.stok})">- Stok</button>
+                        <button class="btn-hapus btn-admin-only" onclick="hapusBarang(${item.id})">🗑️</button>
+                    </div>
                     </div>
                 `;
                 productList.appendChild(card);
@@ -378,10 +392,22 @@
                 pembulatan = totalBayar - totalBayarAsli;
             }
             
-            totalBayarGlobal = totalBayar; // Simpan untuk tombol Quick Cash
+            totalBayarGlobal = totalBayar; 
 
-            const uangBayar = parseFloat(document.getElementById('uang-bayar').value) || 0;
-            const kembalian = uangBayar - totalBayar; 
+            let uangBayar = 0;
+            let kembalian = 0;
+
+            if (metode === 'tunai') {
+                uangBayar = parseFloat(document.getElementById('uang-bayar').value) || 0;
+                kembalian = uangBayar - totalBayar;
+                document.getElementById('uang-bayar').parentElement.style.display = 'block';
+                document.getElementById('uang-kembali').parentElement.style.display = 'flex';
+            } else {
+                uangBayar = totalBayar;
+                kembalian = 0;
+                document.getElementById('uang-bayar').parentElement.style.display = 'none';
+                document.getElementById('uang-kembali').parentElement.style.display = 'none';
+            } 
 
             document.getElementById('subtotal-price').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
             document.getElementById('biaya-layanan').innerText = 'Rp ' + biayaLayanan.toLocaleString('id-ID');
@@ -418,10 +444,23 @@
             const hitungan = hitungKembalian();
             const metode = document.getElementById('metode-pembayaran').value;
 
-            if (document.getElementById('uang-bayar').value === '' || hitungan.uangBayar < hitungan.totalBayar) {
+            if (metode === 'tunai' && (document.getElementById('uang-bayar').value === '' || hitungan.uangBayar < hitungan.totalBayar)) {
                 document.getElementById('uang-bayar').focus(); 
                 return Swal.fire({ icon: 'error', title: 'Pembayaran Kurang', text: 'Uang yang diterima lebih kecil dari total tagihan!' });
             }
+
+            // --- VALIDASI LACI TEKOR ---
+            if (metode === 'tunai') {
+                const saldoLaciSaatIni = modalAwalShift + pendapatanTunaiShiftIni;
+                if (hitungan.kembalian > saldoLaciSaatIni) {
+                    return Swal.fire({
+                        icon: 'error',
+                        title: 'Laci Tekor!',
+                        html: `Kembalian yang harus diberikan: <b>Rp ${hitungan.kembalian.toLocaleString('id-ID')}</b><br>Saldo uang fisik di laci saat ini: <b>Rp ${saldoLaciSaatIni.toLocaleString('id-ID')}</b><br><br><i>Mintalah uang receh tambahan (Petty Cash) kepada Manajer/Admin.</i>`
+                    });
+                }
+            }
+            // ---------------------------
 
             try {
                 const response = await fetch('http://localhost:3000/api/checkout', {
@@ -432,8 +471,15 @@
 
                 const result = await response.json();
                 if (result.status === 'success') {
+                    if (metode === 'tunai') {
+                        pendapatanTunaiShiftIni += hitungan.totalBayar;
+                        localStorage.setItem('pendapatanTunai', pendapatanTunaiShiftIni);
+                    }
+                    
                     const metodeLabel = metode === 'qris' ? 'QRIS' : metode === 'debit' ? 'DEBIT' : 'TUNAI';
-                    const noTransaksi = `TRX-${Date.now().toString().slice(-7)}`;
+
+                    const dbId = result.id || result.transactionId || result.insertId; 
+                    const noTransaksi = dbId ? `#TRX-${String(dbId).padStart(3, '0')}` : `TRX-${Date.now().toString().slice(-7)}`;
                     const tanggal = new Date().toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
 
                     let itemRows = keranjang.map(i => `
@@ -703,7 +749,7 @@
         async function tambahStok(id, nama) {
             const { value: inputStok } = await Swal.fire({
                 title: `Tambah Stok`, text: `Untuk barang: ${nama}`,
-                input: 'number', inputPlaceholder: 'Contoh: 10',
+                input: 'number',
                 showCancelButton: true, confirmButtonColor: '#00c9a7', cancelButtonColor: 'rgba(255,255,255,0.1)',
                 confirmButtonText: 'Tambahkan',
                 inputValidator: (value) => { if (!value || value <= 0) return 'Harap masukkan angka yang valid!'; }
@@ -722,7 +768,30 @@
             } catch (error) { Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan pada server saat menambah stok.' }); }
         }
 
-        let namaKasirAktif = localStorage.getItem('namaKasir') || 'Admin';
+        async function kurangiStok(id, nama, stokSaatIni) {
+            const { value: inputStok } = await Swal.fire({
+                title: `Kurangi Stok`, text: `Barang: ${nama} (Stok Saat Ini: ${stokSaatIni})`,
+                input: 'number',
+                showCancelButton: true, confirmButtonColor: '#ff5f5f', cancelButtonColor: 'rgba(255,255,255,0.1)',
+                confirmButtonText: 'Kurangi Stok',
+                inputValidator: (value) => { 
+                    if (!value || value <= 0) return 'Harap masukkan angka yang valid!'; 
+                    if (value > stokSaatIni) return 'Pengurangan melebihi sisa stok di gudang!';
+                }
+            });
+            if (!inputStok) return; 
+
+            const pengurangan = parseInt(inputStok);
+            try {
+                const response = await fetch(`http://localhost:3000/api/products/${id}/stock`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tambahan_stok: -pengurangan }) 
+                });
+                const result = await response.json();
+                if (result.status === 'success') { fetchProducts(); Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Stok berhasil dikurangi!', timer: 1500, showConfirmButton: false }); } 
+                else { Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal mengurangi stok: ' + result.message }); }
+            } catch (error) { Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan pada server saat mengurangi stok.' }); }
+        }
 
         async function mulaiShift() {
             const nama = document.getElementById('nama-kasir-input').value;
@@ -738,6 +807,10 @@
                 if(res.status === 'success') {
                     currentShiftId = res.shiftId;
                     namaKasirAktif = nama;
+                    modalAwalShift = parseFloat(modal);
+                    pendapatanTunaiShiftIni = 0; // Reset saat buka shift baru
+                    localStorage.setItem('modalAwal', modalAwalShift);
+                    localStorage.setItem('pendapatanTunai', pendapatanTunaiShiftIni);
                     localStorage.setItem('shiftId', currentShiftId);
                     localStorage.setItem('namaKasir', namaKasirAktif);
                     updateShiftUI();
@@ -765,6 +838,8 @@
                 if(res.status === 'success') {
                     currentShiftId = null;
                     localStorage.removeItem('shiftId');
+                    localStorage.removeItem('modalAwal');
+                    localStorage.removeItem('pendapatanTunai');
                     updateShiftUI();
                     fetchShiftHistory();
                     Swal.fire({ icon: 'success', title: 'Shift Ditutup', text: 'Data selisih kas telah direkap dengan aman.', timer: 2000, showConfirmButton: false });

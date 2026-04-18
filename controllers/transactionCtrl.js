@@ -13,7 +13,6 @@ const transactionController = {
         try {
             await connection.beginTransaction();
 
-            // 1. Hitung ulang total belanja di backend (tidak percaya angka dari frontend)
             let subtotal = keranjang.reduce((sum, item) => sum + (item.harga * item.qty), 0);
             let biayaLayanan = 0;
 
@@ -28,12 +27,9 @@ const transactionController = {
                 totalAkhir = Math.ceil(totalAkhir / 100) * 100;
             }
 
-            // 2. Hitung kembalian — hanya relevan untuk tunai
             const uangDibayar = parseFloat(uangBayar) || 0;
             const kembalian   = (metode === 'tunai' || !metode) ? (uangDibayar - totalAkhir) : 0;
 
-            // 3. Simpan transaksi — total_harga = total yang harus dibayar pelanggan
-            //    uang_bayar & kembalian disimpan terpisah agar tidak campur aduk dengan total penjualan
             const [transaksiResult] = await connection.query(
                 `INSERT INTO transaksi
                     (total_harga, metode_pembayaran, biaya_layanan, ppn, uang_bayar, kembalian)
@@ -42,7 +38,6 @@ const transactionController = {
             );
             const transaksiId = transaksiResult.insertId;
 
-            // 4. Simpan detail & kurangi stok
             for (let item of keranjang) {
                 await connection.query(
                     `INSERT INTO detail_transaksi
@@ -57,7 +52,7 @@ const transactionController = {
             }
 
             await connection.commit();
-            res.status(200).json({ status: 'success', message: 'Transaksi berhasil disimpan!' });
+            res.status(200).json({ status: 'success', message: 'Transaksi berhasil disimpan!', id: transaksiId });
 
         } catch (error) {
             await connection.rollback();
